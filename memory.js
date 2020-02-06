@@ -1,125 +1,98 @@
-var cards = ["apple.jpg", "banana.jpg", "coconut.jpg", "coconut.jpg", "grapefruit.jpg", "lemon.jpg", "banana.jpg", "strawberry.jpg", "apple.jpg", "lemon.jpg", "strawberry.jpg", "grapefruit.jpg"];
-cards.sort(function(a, b) {
-    var losowe1 = Math.round( Math.random () * (10 - 1) + 1),
+const cards = [
+    "apple.jpg",
+    "banana.jpg",
+    "coconut.jpg",
+    "coconut.jpg",
+    "grapefruit.jpg",
+    "lemon.jpg",
+    "banana.jpg",
+    "strawberry.jpg",
+    "apple.jpg",
+    "lemon.jpg",
+    "strawberry.jpg",
+    "grapefruit.jpg"
+];
+// Funkcja sortująca karty w losowym porządku
+cards.sort((a, b) => {
+    let losowe1 = Math.round( Math.random () * (10 - 1) + 1),
         losowe2 = Math.round( Math.random () * (10 - 1) + 1);
     return losowe1 - losowe2;
 });
-console.log(cards);
 
-var c0 = document.getElementById('c0');
-var c1 = document.getElementById('c1');
-var c2 = document.getElementById('c2');
-var c3 = document.getElementById('c3');
+// Utworzenie tablicy z uchwytami do kart
+let c = [];
+for(let i = 0; i<12; i++){
+    c[i] = document.getElementById(`c${i}`);
+}
 
-var c4 = document.getElementById('c4');
-var c5 = document.getElementById('c5');
-var c6 = document.getElementById('c6');
-var c7 = document.getElementById('c7');
+// Podpięcie listenerów do kart
+c.forEach((el, index)=> el.addEventListener('click', ()=> revealCard(index)));
 
-var c8 = document.getElementById('c8');
-var c9 = document.getElementById('c9');
-var c10 = document.getElementById('c10');
-var c11 = document.getElementById('c11');
+// Zmienne związane z logiką gry (stan początkowy)
+let oneVisible = false,
+    turnCounter = 0,
+    visible_nr,
+    lock = false,
+    pairsLeft = 6;
 
-c0.addEventListener("click", function() { revealCard(0); });
-c1.addEventListener("click", function() { revealCard(1); });
-c2.addEventListener("click", function() { revealCard(2); });
-c3.addEventListener("click", function() { revealCard(3); });
-
-c4.addEventListener("click", function() { revealCard(4); });
-c5.addEventListener("click", function() { revealCard(5); });
-c6.addEventListener("click", function() { revealCard(6); });
-c7.addEventListener("click", function() { revealCard(7); });
-
-c8.addEventListener("click", function() { revealCard(8); });
-c9.addEventListener("click", function() { revealCard(9); });
-c10.addEventListener("click", function() { revealCard(10); });
-c11.addEventListener("click", function() { revealCard(11); });
-
-var oneVisible = false;
-var turnCounter = 0;
-var visible_nr;
-var lock = false;
-var pairsLeft = 6;
-
-function revealCard(nr)
-{
-	var opacityValue = $('#c'+nr).css('opacity');
-
-	if (opacityValue != 0 && lock == false)
-	{
+// Funkcja "odwaracająca" karty
+function revealCard(nr){
+	let opacityValue = $('#c'+nr).css('opacity');
+	if (opacityValue !== 0 && lock == false){
 		lock = true;
+        let image = "url(img/" + cards[nr] + ")";
+        $('#c'+nr).css('background-image', image);
+        $('#c'+nr).addClass('cardA');
+        $('#c'+nr).removeClass('card');
 
-var image = "url(img/" + cards[nr] + ")";
-$('#c'+nr).css('background-image', image);
-$('#c'+nr).addClass('cardA');
-$('#c'+nr).removeClass('card');
+        if(oneVisible == false){
+            oneVisible = true;
+            visible_nr = nr;
+            lock = false;
+        } else {
+	//druga karta
+            if(cards[visible_nr] === cards[nr]){
+                if(visible_nr === nr){
+                    window.alert("You have to click on different squares!"); // Weryfikacja kliknięć na tę samą kartę
+                    setTimeout(()=>restore2Cards(visible_nr), 300);
+                } else {
+                    setTimeout(()=>hide2Cards(nr, visible_nr), 750);
+                }
+            } else {
+                    setTimeout(()=>restore2Cards(nr, visible_nr), 1000);
+            }
+            turnCounter++;
+            $('.score').html('Turn counter: '+turnCounter);
+            oneVisible = false;
+        }
+	}
+}
 
-if(oneVisible == false)
-{
-	oneVisible = true;
-	visible_nr = nr;
-	lock = false;
-}
-else
-{
-	//second card
-	if(cards[visible_nr] == cards[nr])
-	{
-		setTimeout(function() {hide2Cards(nr, visible_nr) }, 750);
-	}
-	else {
-		setTimeout(function() {restore2Cards(nr, visible_nr) }, 1000);
-	}
-	turnCounter++;
-	$('.score').html('Turn counter: '+turnCounter);
-	oneVisible = false;
-}	
-	}
-}
-function hide2Cards(nr1, nr2)
-{
+// Funkcja usuwająca karty
+function hide2Cards(nr1, nr2){
 	$('#c'+nr1).css('opacity', '0');
 	$('#c'+nr2).css('opacity', '0');
 	lock = false;
-
 	pairsLeft--;
-	if(pairsLeft == 0)
-	{
+	if(pairsLeft === 0){
 		$(".board").html('<h1>You win!<br>Done in '+turnCounter+' turns</h1><br><button onclick="onclickHandler();">Play again</button>');
-	const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-	const oscillator = audioContext.createOscillator();
-		const gainNode = audioContext.createGain();
-		oscillator.connect(gainNode);
-		gainNode.connect(audioContext.destination);
-
-		oscillator.type = "sine";
-		oscillator.frequency.value = 440;
-
-		const now = audioContext.currentTime;
-		gainNode.gain.setValueAtTime(10, now);
-		gainNode.gain.exponentialRampToValueAtTime(0.11, now + 2);
-		  oscillator.start(now);
-		  oscillator.stop(now + 2);
-    
-    oscillator.type = "triangle";
-		oscillator.frequency.setValueAtTime(250, audioContext.currentTime + 0.2);
-		oscillator.frequency.setValueAtTime(220, audioContext.currentTime + 0.4);
-		oscillator.frequency.setValueAtTime(350, audioContext.currentTime + 0.6);
-		oscillator.frequency.setValueAtTime(370, audioContext.currentTime + 0.8);
 	}
 }
-function restore2Cards(nr1, nr2)
-{
+
+// Funkcja odwaracająca karty na ich rewers
+function restore2Cards(nr1, nr2){
 	$('#c'+nr1).css('background-image', 'url(img/card.jpg)');
 	$('#c'+nr1).addClass('card');
 	$('#c'+nr1).removeClass('cardA');
 
 	$('#c'+nr2).css('background-image', 'url(img/card.jpg)');
 	$('#c'+nr2).addClass('card');
-	$('#c'+nr2).removeClass('cardA');
+    $('#c'+nr2).removeClass('cardA');
+
 	lock = false;
 }
+
+// Ponowna gra
 function onclickHandler (){
 	location.reload();
 }
